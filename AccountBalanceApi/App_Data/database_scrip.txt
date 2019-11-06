@@ -1,0 +1,75 @@
+﻿USE [PROVISIODB]
+GO
+/****** Object:  Table [dbo].[Loan_Repayment]    Script Date: 11/6/2019 12:14:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Loan_Repayment](
+	[EntryID] [int] IDENTITY(1,1) NOT NULL,
+	[RefNo] [varchar](50) NOT NULL,
+	[B_AccountNumber] [varchar](50) NULL,
+	[MomoNumber] [varchar](50) NULL,
+	[MNO] [varchar](50) NULL,
+	[Amount] [decimal](18, 0) NOT NULL,
+	[LastUpdated] [datetime] NULL,
+ CONSTRAINT [PK_Loan_Repayment] PRIMARY KEY CLUSTERED 
+(
+	[EntryID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Add_LoanRepayment]    Script Date: 11/6/2019 12:14:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Script for SelectTopNRows command from SSMS  ******/
+CREATE proc [dbo].[usp_Add_LoanRepayment]
+		   @RefNo  VARCHAR(50)
+		  ,@B_AccountNumber VARCHAR(50)=''
+		  ,@MomoNumber VARCHAR(50)=''
+		  ,@MNO VARCHAR(50)
+		  ,@Amount decimal(18,2)
+	 
+as
+INSERT INTO Loan_Repayment
+		( [RefNo]
+		  ,[B_AccountNumber]
+		  ,[MomoNumber]
+		  ,[MNO]
+		  ,[Amount]		 
+		  ,[LastUpdated])
+VALUES			
+		( @RefNo
+		  ,@B_AccountNumber
+		  ,@MomoNumber
+		  ,@MNO
+		  ,@Amount
+		  ,GETDATE() )
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Get_All_Transactions]    Script Date: 11/6/2019 12:14:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Script for SelectTopNRows command from SSMS  ******/
+CREATE proc [dbo].[usp_Get_All_Transactions]
+as
+SELECT *  FROM Loan_Repayment
+		
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Get_Transaction_RefNo]    Script Date: 11/6/2019 12:14:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/****** Script for SelectTopNRows command from SSMS  ******/
+CREATE proc [dbo].[usp_Get_Transaction_RefNo] 
+@refNo varchar(50)
+as
+SELECT * FROM [dbo].Loan_Repayment
+where RefNo=@refNo
+
+		
+GO
