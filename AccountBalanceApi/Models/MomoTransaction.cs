@@ -22,7 +22,8 @@ namespace AccountBalanceApi.Models
 
         public string MNO { get; set; }
 
-        
+        public string LastUpdated { get; set; }
+
 
     }
 }

@@ -114,11 +114,11 @@ namespace AccountBalanceApi.Models
             return null;
         }
         //Get Transaction by RefNo
-        public Transactions GetTransactionByRefNo(string ref_number)
+        public BankTransaction GetBankTransactionByRefNo(string ref_number)
         {
             using (var command = new SqlCommand())
             {
-                command.CommandText = "usp_Get_Transaction_RefNo";
+                command.CommandText = "usp_Get_Bank_Transaction_RefNo";
                 command.Parameters.AddWithValue("@refNo", ref_number);
 
                 var dt = GetData(command);
@@ -128,12 +128,41 @@ namespace AccountBalanceApi.Models
 
                     var r = dt.Rows[0];
 
-                    var transaction = new Transactions
+                    var transaction = new BankTransaction
                     {
                         EntryID = (int)r["EntryID"],
                         RefNo = r["RefNo"].ToString(),
                         Amount = Convert.ToDecimal(r["Amount"]),
                         B_AccountNumber = r["B_AccountNumber"].ToString(),
+                       
+                        LastUpdated = r["LastUpdated"].ToString()
+                    };
+                    return transaction;
+                }
+
+                return null;
+            }
+        }
+
+        public MomoTransaction GetMomoTransactionByRefNo(string ref_number)
+        {
+            using (var command = new SqlCommand())
+            {
+                command.CommandText = "usp_Get_Momo_Transaction_RefNo";
+                command.Parameters.AddWithValue("@refNo", ref_number);
+
+                var dt = GetData(command);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+
+                    var r = dt.Rows[0];
+
+                    var transaction = new MomoTransaction
+                    {
+                        EntryID = (int)r["EntryID"],
+                        RefNo = r["RefNo"].ToString(),
+                        Amount = Convert.ToDecimal(r["Amount"]),                      
                         MomoNumber = r["MomoNumber"].ToString(),
                         MNO = r["MNO"].ToString(),
                         LastUpdated = r["LastUpdated"].ToString()
@@ -146,7 +175,7 @@ namespace AccountBalanceApi.Models
         }
 
         //Add or Post Transactions
-        public string PostTransaction(Transactions transactions)
+        public string PostBankTransaction(BankTransaction transaction)
         {
             string msg = "";
             try
@@ -155,13 +184,11 @@ namespace AccountBalanceApi.Models
                 var last_accessed = DateTime.Now;
                 using (var command = new SqlCommand())
                 {
-                    command.CommandText = "[usp_Add_LoanRepayment]";
+                    command.CommandText = "[usp_Bank_LoanRepayment]";
 
-                    command.Parameters.AddWithValue("@RefNo ", transactions.RefNo);
-                    command.Parameters.AddWithValue("@B_AccountNumber ", transactions.B_AccountNumber);
-                    command.Parameters.AddWithValue("@MomoNumber ", transactions.MomoNumber);
-                    command.Parameters.AddWithValue("@MNO ", transactions.MNO);
-                    command.Parameters.AddWithValue("@Amount", transactions.Amount);
+                    command.Parameters.AddWithValue("@RefNo ", transaction.RefNo);
+                    command.Parameters.AddWithValue("@B_AccountNumber ", transaction.B_AccountNumber);
+                    command.Parameters.AddWithValue("@Amount", transaction.Amount);
 
                     var result = Save(command);
 
@@ -175,7 +202,34 @@ namespace AccountBalanceApi.Models
             return msg;
         }
 
+        //Add or Post Transactions
+        public string PostMomoTransaction(MomoTransaction transaction)
+        {
+            string msg = "";
+            try
+            {
 
+                var last_accessed = DateTime.Now;
+                using (var command = new SqlCommand())
+                {
+                    command.CommandText = "[usp_Momo_LoanRepayment]";
+
+                    command.Parameters.AddWithValue("@RefNo ", transaction.RefNo);
+                    command.Parameters.AddWithValue("@MomoNumber ", transaction.MomoNumber);
+                    command.Parameters.AddWithValue("@MNO ", transaction.MNO);
+                    command.Parameters.AddWithValue("@Amount", transaction.Amount);
+
+                    var result = Save(command);
+
+                    msg = result;
+                }
+            }
+            catch (Exception ex)
+            {
+                msg = ex.Message;
+            }
+            return msg;
+        }
 
     }
 }

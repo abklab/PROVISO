@@ -19,7 +19,7 @@ namespace AccountBalanceApi.Models
         [Required]
         public string B_AccountNumber { get; set; }
 
-        
+        public string LastUpdated { get; set; }
 
     }
 }

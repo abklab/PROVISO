@@ -12,75 +12,78 @@ namespace AccountBalanceApi.Controllers
 {
     [RoutePrefix("provisio/api/v1000/_transactions")]
     public class LoanPaymentTransactionController : ApiController
+
     {
         TransactionServices services = new TransactionServices();
-        // GET: LoanPaymentTransaction
-        [Route("get_transactons")]
-        [ResponseType(typeof(Transactions))]
-        public IHttpActionResult Get()
-        {
-            var list = services.GetTransactions();
-            return Ok(list);
-        }
+
+
+        //    // GET: LoanPaymentTransaction
+        //    [Route("get_transactons")]
+        //    [ResponseType(typeof(Transactions))]
+        //    public IHttpActionResult Get()
+        //    {
+        //        var list = services.GetTransactions();
+        //        return Ok(list);
+        //    }
 
         /// <summary>
-        /// Get By RefNo
+        /// Get Bank repayment By RefNo
         /// </summary>
         /// <param name="ref_number"></param>
-        /// <returns></returns>
-        
-        [ResponseType(typeof(Transactions))]
-        [Route("{ref_number}/refno")]
-        public IHttpActionResult Get(string ref_number)
+        /// <returns>Momo repayment Account</returns>       
+        [ResponseType(typeof(MomoTransaction))]
+        [Route("maccount/{ref_number}/mp-500")]
+        public IHttpActionResult GetByMomoNumber(string ref_number)
         {
-            var transaction = services.GetTransactionByRefNo(ref_number);
+            var transaction = services.GetMomoTransactionByRefNo(ref_number);
+            if (transaction == null)
+                return StatusCode(HttpStatusCode.NotFound);
             return Ok(transaction);
         }
 
+        /// <summary>
+        /// Get Bank Repayment By RefNo
+        /// </summary>
+        /// <param name="ref_number"></param>
+        /// <returns>Bank Account</returns>   
+        [ResponseType(typeof(BankTransaction))]
+        [Route("baccount/{ref_number}/bp-100")]
+        public IHttpActionResult GetByBankAccount(string ref_number)
+        {
+            var transaction = services.GetBankTransactionByRefNo(ref_number);
+            if (transaction == null)
+                return StatusCode(HttpStatusCode.NotFound);
+            return Ok(transaction);
+        }
+
+
         // POST: api/LoanPaymentTransaction
-        [Route("_post/repayments/bankpayment")]
+        [Route("_bankpost/bp-100/repayments")]
         public IHttpActionResult PostBankAccount([FromBody]BankTransaction banktransaction)
         {
             if (string.IsNullOrWhiteSpace(banktransaction.B_AccountNumber))
                 return StatusCode(HttpStatusCode.BadRequest);
             else
             {
-                var transaction = new Transactions
-                {
-                    RefNo = banktransaction.RefNo,
-                    Amount = banktransaction.Amount,
-                    B_AccountNumber = banktransaction.B_AccountNumber,
-                    MomoNumber="n/a",
-                    MNO="n/a",
-                                   
-                };
-                var result = services.PostTransaction(transaction);
+                var result = services.PostBankTransaction(banktransaction);
 
                 string responseTime = DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss tt");
 
-                return result == "Success" ? Ok($"S-100-B {responseTime}") : Ok($"R-500-B {responseTime}");             
+                return result == "Success" ? Ok($"S-100-B {responseTime}") : Ok($"R-500-B {responseTime}");
             }
         }
 
+
         // POST: api/LoanPaymentTransaction
-        [Route("_post/repayments/momopayment")]
+        [Route("_momopost/mp-500/repayments")]
         public IHttpActionResult PostByMomoNumber([FromBody]MomoTransaction momotransaction)
         {
-            
-            if ( string.IsNullOrWhiteSpace(momotransaction.MomoNumber))
+
+            if (string.IsNullOrWhiteSpace(momotransaction.MomoNumber))
                 return StatusCode(HttpStatusCode.BadRequest);
             else
             {
-                var transaction = new Transactions
-                {
-                    RefNo = momotransaction.RefNo,
-                    Amount = momotransaction.Amount,
-                    MomoNumber = momotransaction.MomoNumber,
-                    MNO = momotransaction.MNO,
-                  B_AccountNumber  = "n/a",
-                };
-
-                var result = services.PostTransaction(transaction);
+                var result = services.PostMomoTransaction(momotransaction);
 
                 string responseTime = DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss tt");
 
